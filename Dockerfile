@@ -20,11 +20,6 @@ ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
 
 WORKDIR /tmp
 
-#DCEVM installation
-#Since DCEVM for Xenial seems kind of broken, we download it from zetzy
-RUN wget http://mirrors.kernel.org/ubuntu/pool/universe/o/openjdk-8-jre-dcevm/openjdk-8-jre-dcevm_8u112-1_amd64.deb && \
-    dpkg -i openjdk-8-jre-dcevm_8u112-1_amd64.deb
-
 # Install Tomcat 8
 ENV CATALINA_HOME=/usr/local/tomcat
 ENV TOMCAT_MAJOR=8 TOMCAT_VERSION=8.0.44
@@ -64,13 +59,6 @@ ENV PATH=$DSPACE_HOME/bin:$PATH
 # Configure remote debugging and extra memory
 COPY setenv.sh $CATALINA_HOME/bin
 
-#Install Hotswap agent
-#COPY HotswapAgent-0.3.zip /usr/lib/hotswapagent/HotswapAgent-0.3.zip
-RUN wget https://github.com/HotswapProjects/HotswapAgent/releases/download/RELEASE-0.3/HotswapAgent-0.3.zip -O HotswapAgent.zip
-RUN mkdir /usr/lib/hotswapagent
-RUN unzip HotswapAgent.zip -d /usr/lib/hotswapagent/
-RUN rm HotswapAgent.zip
-
 RUN apt install -y sudo
 
 RUN export HOME=/home/developer
@@ -95,24 +83,10 @@ RUN unzip probe.zip
 
 COPY conf $CATALINA_HOME/conf
 
-RUN wget https://deb.nodesource.com/setup_6.x -O -| sudo bash - \
+RUN wget https://deb.nodesource.com/setup_12.x -O -| sudo bash - \
   && apt-get install nodejs -y
 
 RUN npm install -g grunt bower
-
-###
-# Installing an IDE
-###
-
-#Download the IDE
-#ADD https://download.jetbrains.com/idea/ideaIC-2016.1.2.tar.gz /home/developer/idea
-
-#Required for running Idea IDE
-#RUN apt-get install libxext-dev libxrender-dev libxtst-dev -y
-
-#To make intellij work. For some reason, it requires the fonts to be installed
-#RUN  apt-get install fontconfig fontconfig-config fonts-dejavu-core fonts-dejavu-extra -y
-
 
 #Uncomment this lines to set a custom UID. E.g.: 1009
 #RUN export uid=1009 && usermod -u $uid developer
@@ -129,11 +103,11 @@ USER developer
 USER developer
 #Install ruby deps
 RUN sudo apt-get install -y bison build-essential zlib1g-dev libssl-dev libxml2-dev git-core
-RUN curl -sSL https://rvm.io/mpapis.asc | gpg --import - \
-  && curl -sSL https://raw.githubusercontent.com/wayneeseguin/rvm/stable/binscripts/rvm-installer | bash -s stable --ruby
+RUN gpg --keyserver hkp://pool.sks-keyservers.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 7D2BAF1CF37B13E2069D6956105BD0E739499BDB
+RUN curl -sSL https://raw.githubusercontent.com/wayneeseguin/rvm/stable/binscripts/rvm-installer | bash -s stable --ruby
 
 RUN bash -c "source ~/.profile \
-  && gem install sass -v 3.3.14  \
+  && gem install sass -v 3.4.25  \
   && gem install compass -v 1.0.1"
 
 RUN echo "source ~/.profile" >> ~/.bashrc

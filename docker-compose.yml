@@ -1,7 +1,8 @@
 version: '2'
 services:
   # Postgres database
-  postgres:
+  dspacedb:
+    container_name: dspacedb
     build: ./postgres
     ports:
       - 5432:5432
@@ -12,7 +13,8 @@ services:
     tty: true
     stdin_open: true
   # DSpace
-  dspace-dev:
+  dspace:
+    container_name: dspace
     build: .
     ports:
       - 8080:8080
@@ -20,13 +22,14 @@ services:
       #Remote Debugger
       - 1043:1043
     depends_on:
-      - postgres
+      - dspacedb
     environment:
       - DISPLAY=${DISPLAY}
     volumes:
       # Path on the host, relative to the Compose file
       - ./dspace-build:/srv/dspace
       - ./dspace-src:/srv/dspace-src
+      - ./conf/dspace/local.cfg:/srv/dspace-src/dspace/config/local.cfg
       - ./m2-repo:/home/developer/.m2
       - /tmp/.X11-unix:/tmp/.X11-unix
     command: /bin/bash
